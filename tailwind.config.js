@@ -5,6 +5,7 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   safelist: [
+    "dummy-cache-bust",
     // Layout
     "flex",
     "items-center",
