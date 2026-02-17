@@ -40,7 +40,7 @@ export const Login: React.FC = () => {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-950 px-4">
+        <div className="w-screen h-screen flex items-center justify-center bg-gray-950 px-4">
             <div className="w-full max-w-sm space-y-8 bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
                 <div className="text-center">
                     <div className="mx-auto w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center mb-4">
