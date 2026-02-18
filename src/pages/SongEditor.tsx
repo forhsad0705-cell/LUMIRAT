@@ -29,7 +29,7 @@ export const SongEditor: React.FC = () => {
 
     const [transpose, setTranspose] = useState(0);
     const [showChords] = useState(true);
-    const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit'); // Mobile tab
+    const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
 
     const [isLiveMode, setLiveMode] = useState(false);
     const [autoScrollSpeed, setAutoScrollSpeed] = useState(0);
@@ -40,9 +40,6 @@ export const SongEditor: React.FC = () => {
     useEffect(() => {
         if (autoScrollSpeed > 0 && isLiveMode) {
             scrollInterval.current = window.setInterval(() => {
-                // Scroll the preview container, which is effectively the window/body in live mode sometimes, 
-                // or a specific container. Let's target the preview container.
-                // In Live Mode, the preview is full screen.
                 const container = document.getElementById('live-preview-container');
                 if (container) {
                     container.scrollTop += 1;
@@ -70,7 +67,6 @@ export const SongEditor: React.FC = () => {
 
             if (error) {
                 console.error('Error fetching song:', error);
-                // alert('Song not found'); // Removed alert for cleaner UX, maybe toast later
                 navigate('/songs');
             } else if (data) {
                 const content = data.lyrics || data.content || '';
@@ -132,15 +128,9 @@ export const SongEditor: React.FC = () => {
     const insertChord = (chord: string) => {
         const textarea = editorRef.current;
         if (!textarea) {
-            // If in preview tab, switch to edit?
             if (activeTab === 'preview') setActiveTab('edit');
             return;
         }
-
-        // We need to focus textarea if we are mobile and swapping tabs, 
-        // effectively simplified: Keyboard inserts into Text State, but cursor pos calculation needs ref.
-        // If ref is null (hidden), we append to end or just fail gracefully?
-        // For now, let's assume if you click chord, you want to edit.
 
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
@@ -158,23 +148,20 @@ export const SongEditor: React.FC = () => {
         exportToPDF('preview-content', `${title}.pdf`);
     };
 
-    // --- RENDER ---
-
     if (loading) return <div className="h-screen flex items-center justify-center bg-gray-950 text-gray-500">Loading song...</div>;
 
     if (isLiveMode) {
         return (
             <div className="fixed inset-0 bg-black text-white z-50 flex flex-col overflow-hidden">
-                {/* Live Controls Overlay (Fade out?) */}
                 <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start opacity-0 hover:opacity-100 transition-opacity bg-gradient-to-b from-black/80 to-transparent z-50">
-                    <Button variant="secondary" size="sm" onClick={() => setLiveMode(false)}>
+                    <Button variant="secondary" className="h-8 px-3 text-xs" onClick={() => setLiveMode(false)}>
                         Exit Live Mode
                     </Button>
 
                     <div className="flex gap-2 bg-gray-900/80 backdrop-blur rounded-lg p-1 border border-gray-800">
                         <Button
                             variant="ghost"
-                            size="sm"
+                            className="h-8 px-3 text-xs"
                             onClick={() => setAutoScrollSpeed(Math.max(0, autoScrollSpeed - 1))}
                         >
                             <Minus className="w-4 h-4" />
@@ -184,7 +171,7 @@ export const SongEditor: React.FC = () => {
                         </span>
                         <Button
                             variant="ghost"
-                            size="sm"
+                            className="h-8 px-3 text-xs"
                             onClick={() => setAutoScrollSpeed(Math.min(5, autoScrollSpeed + 1))}
                         >
                             <Plus className="w-4 h-4" />
@@ -199,7 +186,7 @@ export const SongEditor: React.FC = () => {
                             text={text}
                             transpose={transpose}
                             showChords={true}
-                            fontSize={24} // Larger for live
+                            fontSize={24}
                             className="p-0"
                         />
                     </div>
@@ -213,15 +200,17 @@ export const SongEditor: React.FC = () => {
             {/* Header / Toolbar */}
             <header className="h-16 border-b border-gray-800 bg-gray-900/50 backdrop-blur flex items-center justify-between px-4 shrink-0 gap-4">
                 <div className="flex items-center gap-3 overflow-hidden">
-                    <Button variant="ghost" size="icon" onClick={() => navigate('/songs')}>
+                    <Button variant="ghost" className="h-10 w-10 p-2" onClick={() => navigate('/songs')}>
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
-                    <Input
-                        value={title}
-                        onChange={handleTitleChange}
-                        className="bg-transparent border-transparent hover:border-gray-800 focus:border-orange-500 w-full min-w-[200px] font-bold text-lg h-9 px-2 text-white placeholder-gray-600"
-                        placeholder="Song Title"
-                    />
+                    <div className="w-full min-w-[200px]">
+                        <Input
+                            value={title}
+                            onChange={handleTitleChange}
+                            className="bg-transparent border-transparent hover:border-gray-800 focus:border-orange-500 font-bold text-lg h-9 px-2 text-white placeholder-gray-600"
+                            placeholder="Song Title"
+                        />
+                    </div>
                     {isSaving ? (
                         <span className="text-xs text-gray-500 animate-pulse hidden sm:inline-block">Saving...</span>
                     ) : (
@@ -232,29 +221,28 @@ export const SongEditor: React.FC = () => {
                 <div className="flex items-center gap-2">
                     {/* Transpose Control */}
                     <div className="flex items-center bg-gray-800/50 rounded-lg p-0.5 border border-gray-700/50 hidden sm:flex">
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setTranspose(t => t - 1)}>
+                        <Button variant="ghost" className="h-7 w-7 p-0" onClick={() => setTranspose(t => t - 1)}>
                             <Minus className="w-3 h-3" />
                         </Button>
                         <span className="w-8 text-center text-xs font-mono font-bold text-orange-400">
                             {transpose > 0 ? `+${transpose}` : transpose}
                         </span>
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setTranspose(t => t + 1)}>
+                        <Button variant="ghost" className="h-7 w-7 p-0" onClick={() => setTranspose(t => t + 1)}>
                             <Plus className="w-3 h-3" />
                         </Button>
                     </div>
 
                     <div className="h-6 w-px bg-gray-800 hidden sm:block mx-1" />
 
-                    <Button variant="ghost" size="icon" onClick={handleExport} title="Export PDF">
+                    <Button variant="ghost" className="h-10 w-10 p-2" onClick={handleExport} title="Export PDF">
                         <Download className="w-4 h-4" />
                     </Button>
 
-                    <Button variant="primary" size="sm" onClick={() => setLiveMode(true)} className="hidden sm:flex">
+                    <Button variant="primary" className="h-8 px-3 text-xs hidden sm:flex" onClick={() => setLiveMode(true)}>
                         <Play className="w-4 h-4 mr-2" />
                         Live Mode
                     </Button>
-                    {/* Mobile Play Button */}
-                    <Button variant="primary" size="icon" onClick={() => setLiveMode(true)} className="sm:hidden">
+                    <Button variant="primary" className="h-10 w-10 p-2 sm:hidden" onClick={() => setLiveMode(true)}>
                         <Play className="w-4 h-4" />
                     </Button>
                 </div>
@@ -263,7 +251,7 @@ export const SongEditor: React.FC = () => {
             {/* Main Content Area */}
             <main className="flex-1 flex overflow-hidden relative">
 
-                {/* Editor Pane (Hidden on mobile if Preview tab active) */}
+                {/* Editor Pane */}
                 <div className={cn(
                     "flex-1 flex flex-col min-w-0 transition-all duration-300 absolute inset-0 md:relative z-10 bg-gray-950 md:z-auto",
                     activeTab === 'preview' ? "translate-x-[-100%] md:translate-x-0" : "translate-x-0"
@@ -275,11 +263,11 @@ export const SongEditor: React.FC = () => {
                         className="flex-1"
                     />
 
-                    {/* Chord Keyboard (Sticky at bottom of Editor) */}
+                    {/* Chord Keyboard */}
                     <ChordKeyboard onInsert={insertChord} currentKey="C" className="shrink-0" />
                 </div>
 
-                {/* Preview Pane (Hidden on mobile if Edit tab active) */}
+                {/* Preview Pane */}
                 <div className={cn(
                     "flex-1 bg-gray-900 border-l border-gray-800 flex flex-col min-w-0 transition-all duration-300 absolute inset-0 md:relative z-10 md:z-auto",
                     activeTab === 'edit' ? "translate-x-[100%] md:translate-x-0" : "translate-x-0"
@@ -296,20 +284,18 @@ export const SongEditor: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Mobile Tab Switcher Overlay */}
+                {/* Mobile Tab Switcher */}
                 <div className="md:hidden absolute bottom-20 right-4 z-50 flex gap-2">
                     <Button
                         variant="secondary"
-                        size="sm"
-                        className={cn("shadow-xl rounded-full px-6", activeTab === 'edit' ? "bg-orange-600 text-white border-orange-500" : "opacity-80")}
+                        className={cn("shadow-xl rounded-full px-6 h-10", activeTab === 'edit' ? "bg-orange-600 text-white border-orange-500" : "opacity-80")}
                         onClick={() => setActiveTab('edit')}
                     >
                         Edit
                     </Button>
                     <Button
                         variant="secondary"
-                        size="sm"
-                        className={cn("shadow-xl rounded-full px-6", activeTab === 'preview' ? "bg-orange-600 text-white border-orange-500" : "opacity-80")}
+                        className={cn("shadow-xl rounded-full px-6 h-10", activeTab === 'preview' ? "bg-orange-600 text-white border-orange-500" : "opacity-80")}
                         onClick={() => setActiveTab('preview')}
                     >
                         Preview

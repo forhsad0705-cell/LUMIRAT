@@ -1,28 +1,40 @@
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import React from 'react';
+import { cn } from '../../lib/utils';
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+    label?: string;
     error?: string;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-    ({ className, error, ...props }, ref) => {
+    ({ className, label, error, id, ...props }, ref) => {
+        const inputId = id || React.useId();
+
         return (
-            <div className="w-full">
+            <div className="w-full space-y-2">
+                {label && (
+                    <label
+                        htmlFor={inputId}
+                        className="text-sm font-medium text-gray-300 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                        {label}
+                    </label>
+                )}
                 <input
+                    id={inputId}
+                    ref={ref}
                     className={cn(
-                        "flex h-10 w-full rounded-lg border bg-gray-900/50 px-3 py-2 text-sm ring-offset-gray-950 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
+                        "flex h-10 w-full rounded-lg border bg-gray-900/50 px-3 py-2 text-sm text-gray-100 ring-offset-gray-950 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
                         error
                             ? "border-red-500 focus-visible:ring-red-500"
-                            : "border-gray-800 focus-visible:ring-orange-500 hover:border-gray-700",
+                            : "border-gray-800 hover:border-gray-700",
                         className
                     )}
-                    ref={ref}
                     {...props}
                 />
-                {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+                {error && <p className="text-xs text-red-400">{error}</p>}
             </div>
         );
     }
 );
-Input.displayName = "Input";
+Input.displayName = 'Input';

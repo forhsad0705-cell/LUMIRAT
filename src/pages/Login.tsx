@@ -66,9 +66,10 @@ export const Login: React.FC = () => {
 
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-4">
               <Input
-                placeholder="Email address"
+                label="Email"
+                placeholder="name@example.com"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -76,7 +77,8 @@ export const Login: React.FC = () => {
                 required
               />
               <Input
-                placeholder="Password"
+                label="Password"
+                placeholder="••••••••"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -95,7 +97,7 @@ export const Login: React.FC = () => {
               type="submit"
               className="w-full h-12 text-base"
               disabled={loading}
-              isLoading={loading}
+              loading={loading}
             >
               {mode === 'login' ? 'Sign In' : 'Create Account'}
             </Button>
