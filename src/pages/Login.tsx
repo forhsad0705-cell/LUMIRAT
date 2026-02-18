@@ -2,98 +2,119 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { Music } from 'lucide-react';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 
 export const Login: React.FC = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [mode, setMode] = useState<'login' | 'signup'>('login');
-    const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const navigate = useNavigate();
 
-    const handleAuth = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-        try {
-            if (mode === 'signup') {
-                const { error } = await supabase.auth.signUp({
-                    email,
-                    password,
-                });
-                if (error) throw error;
-                alert('Check your email for the confirmation link!');
-            } else {
-                const { error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password,
-                });
-                if (error) throw error;
-                navigate('/songs');
-            }
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+    try {
+      if (mode === 'signup') {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (error) throw error;
+        alert('Check your email for the confirmation link!');
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
+        navigate('/songs');
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#3b2f2f] to-[#f7e9b0]">
-    <div className="bg-white/90 backdrop-blur-md p-10 rounded-2xl shadow-xl w-full max-w-md">
-      <div className="text-center mb-8">
-        <div className="mx-auto w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center mb-4">
-          <Music className="text-white w-7 h-7" />
-        </div>
-        <h1 className="text-2xl font-bold text-neutral-800">
-          {mode === 'login' ? 'Welcome back' : 'Create account'}
-        </h1>
-        <p className="text-neutral-600">
-          {mode === 'login' ? 'Sign in to LUMIRAT' : 'Sign up to get started'}
-        </p>
-      </div>
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Gradients */}
+      <div className="absolute inset-0 bg-gray-950 pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-orange-900/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
 
-      <form onSubmit={handleAuth} className="space-y-5">
-        <input
-          className="w-full p-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-yellow-400 outline-none"
-          placeholder="Email address"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      <Card className="w-full max-w-md border-gray-800 bg-gray-900/80 backdrop-blur-xl relative z-10">
+        <CardHeader className="text-center space-y-4 pb-8">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-900/30 transform rotate-3">
+            <Music className="text-white w-8 h-8" />
+          </div>
+          <div className="space-y-2">
+            <CardTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-200 to-orange-500">
+              LUMIRAT
+            </CardTitle>
+            <p className="text-gray-400">
+              {mode === 'login' ? 'Welcome back, musician by night.' : 'Join the new age of lyric editing.'}
+            </p>
+          </div>
+        </CardHeader>
 
-        <input
-          className="w-full p-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-yellow-400 outline-none"
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <CardContent>
+          <form onSubmit={handleAuth} className="space-y-4">
+            <div className="space-y-2">
+              <Input
+                placeholder="Email address"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                required
+              />
+              <Input
+                placeholder="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+                required
+              />
+            </div>
 
-        {error && (
-          <p className="text-red-600 text-center">{error}</p>
-        )}
+            {error && (
+              <div className="p-3 rounded-lg bg-red-900/20 border border-red-900/50 text-red-200 text-sm text-center">
+                {error}
+              </div>
+            )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-[#3b2f2f] text-white py-3 rounded-lg hover:bg-[#4a3a3a] transition disabled:opacity-50"
-        >
-          {loading ? 'Loading...' : mode === 'login' ? 'Sign in' : 'Sign up'}
-        </button>
-      </form>
+            <Button
+              type="submit"
+              className="w-full h-12 text-base"
+              disabled={loading}
+              isLoading={loading}
+            >
+              {mode === 'login' ? 'Sign In' : 'Create Account'}
+            </Button>
+          </form>
 
-      <p className="text-center mt-6 text-neutral-700">
-        {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
-        <span
-          className="text-[#3b2f2f] font-semibold cursor-pointer"
-          onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-        >
-          {mode === 'login' ? 'Sign up' : 'Sign in'}
-        </span>
-      </p>
+          <div className="mt-8 pt-6 border-t border-gray-800 text-center">
+            <p className="text-gray-500 text-sm">
+              {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
+              <button
+                type="button"
+                className="text-orange-400 hover:text-orange-300 font-semibold transition-colors focus:outline-none"
+                onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+              >
+                {mode === 'login' ? 'Sign up' : 'Sign in'}
+              </button>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
-  </div>
-    );
+  );
 };

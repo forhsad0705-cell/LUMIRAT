@@ -1,6 +1,47 @@
 @import "tailwindcss";
 
-html, body {
-  height: 100%;
-  width: 100%;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+    @apply antialiased text-gray-100 bg-gray-950;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10;
+  }
+  
+  .glass-card {
+    @apply bg-gray-900/60 backdrop-blur-xl border border-white/10 shadow-xl;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(249, 115, 22, 0.5);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-700 rounded-full hover:bg-gray-600 transition-colors;
 }

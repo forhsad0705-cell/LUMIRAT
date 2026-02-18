@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { Music, Plus, LogOut, FileText } from 'lucide-react';
+import { Music, Plus, LogOut, FileText, Calendar, ChevronRight } from 'lucide-react';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
 
 interface Song {
     id: string;
     title: string;
     updated_at: string;
+    lyrics?: string;
 }
 
 export const SongList: React.FC = () => {
     const [songs, setSongs] = useState<Song[]>([]);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -27,17 +31,19 @@ export const SongList: React.FC = () => {
     }, []);
 
     const fetchSongs = async () => {
+        setLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
         // Fetch songs for this user
         const { data } = await supabase
             .from('songs')
-            .select('id, title, updated_at')
+            .select('id, title, updated_at, lyrics')
             .eq('user_id', user.id)
             .order('updated_at', { ascending: false });
 
         if (data) setSongs(data);
+        setLoading(false);
     };
 
     const handleCreate = async () => {
@@ -50,9 +56,9 @@ export const SongList: React.FC = () => {
                 {
                     user_id: user.id,
                     title: 'New Song',
-                    lyrics: '', // We can use 'content' or 'lyrics' column. Let's use 'lyrics' as per request.
-                    chords: '', // And 'chords'.
-                    content: '' // Keeping content for compatibility if needed, or just map appropriately.
+                    lyrics: '',
+                    chords: '',
+                    content: ''
                 }
             ])
             .select()
@@ -71,60 +77,91 @@ export const SongList: React.FC = () => {
         navigate('/login');
     };
 
+    if (loading) {
+        return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-gray-500">Loading library...</div>;
+    }
+
     return (
-        <div className="min-h-screen bg-gray-950 text-white">
-            <header className="flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-gray-900">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center">
-                        <Music className="text-white w-5 h-5" />
+        <div className="min-h-screen bg-gray-950 text-white selection:bg-orange-500/30">
+            {/* Header */}
+            <header className="sticky top-0 z-40 w-full border-b border-white/5 bg-gray-950/80 backdrop-blur-xl">
+                <div className="flex h-16 items-center justify-between px-6 max-w-7xl mx-auto">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center shadow-lg shadow-orange-900/20">
+                            <Music className="text-white w-5 h-5" />
+                        </div>
+                        <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-200 to-orange-500">
+                            LUMIRAT
+                        </h1>
                     </div>
-                    <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-200 to-orange-500">
-                        LUMIRAT
-                    </h1>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleLogout}
+                        className="text-gray-400 hover:text-white"
+                    >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Sign Out
+                    </Button>
                 </div>
-                <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-                >
-                    <LogOut className="w-4 h-4" />
-                    Sign Out
-                </button>
             </header>
 
-            <main className="max-w-4xl mx-auto p-6">
-                <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-2xl font-bold">My Songs</h2>
-                    <button
-                        onClick={handleCreate}
-                        className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 rounded-lg font-bold shadow-lg shadow-orange-900/20 transition-all"
-                    >
-                        <Plus className="w-5 h-5" />
+            <main className="max-w-7xl mx-auto p-6 space-y-8">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight text-white/90">Library</h2>
+                        <p className="text-gray-500 mt-1">Manage your chord charts and lyrics.</p>
+                    </div>
+                    <Button onClick={handleCreate} className="w-full sm:w-auto shadow-orange-500/10">
+                        <Plus className="w-5 h-5 mr-2" />
                         New Song
-                    </button>
+                    </Button>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {songs.map(song => (
-                        <div
+                        <Card
                             key={song.id}
                             onClick={() => navigate(`/songs/${song.id}`)}
-                            className="group bg-gray-900 border border-gray-800 rounded-xl p-4 hover:border-orange-500/50 hover:bg-gray-800 cursor-pointer transition-all"
+                            className="group cursor-pointer border-gray-800 bg-gray-900/40 hover:bg-gray-800/60 hover:border-orange-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-900/10 hover:-translate-y-1 overflow-hidden"
                         >
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="p-2 bg-gray-800 rounded-lg group-hover:bg-gray-700 transition-colors">
-                                    <FileText className="w-6 h-6 text-orange-400" />
+                            <div className="p-5 space-y-4">
+                                <div className="flex items-start justify-between">
+                                    <div className="p-2.5 bg-gray-800/50 rounded-xl group-hover:bg-orange-500/10 group-hover:text-orange-500 transition-colors">
+                                        <FileText className="w-6 h-6 text-gray-400 group-hover:text-orange-500 transition-colors" />
+                                    </div>
+                                    <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-transform group-hover:translate-x-1" />
                                 </div>
+                                <div className="space-y-1">
+                                    <h3 className="font-semibold text-lg truncate pr-2 text-gray-100 group-hover:text-white">{song.title}</h3>
+                                    <div className="flex items-center text-xs text-gray-500">
+                                        <Calendar className="w-3 h-3 mr-1.5" />
+                                        {new Date(song.updated_at).toLocaleDateString(undefined, {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric'
+                                        })}
+                                    </div>
+                                </div>
+                                {song.lyrics && (
+                                    <p className="text-xs text-gray-600 line-clamp-2 font-mono h-8">
+                                        {song.lyrics.slice(0, 100)}...
+                                    </p>
+                                )}
                             </div>
-                            <h3 className="font-bold text-lg mb-1 truncate">{song.title}</h3>
-                            <p className="text-xs text-gray-500">
-                                Updated {new Date(song.updated_at).toLocaleDateString()}
-                            </p>
-                        </div>
+                        </Card>
                     ))}
 
                     {songs.length === 0 && (
-                        <div className="col-span-full text-center py-12 text-gray-500 bg-gray-900/50 rounded-xl border border-dashed border-gray-800">
-                            <p>No songs yet. Create your first one!</p>
+                        <div className="col-span-full py-20 text-center rounded-2xl border border-dashed border-gray-800 bg-gray-900/20">
+                            <div className="mx-auto w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mb-4">
+                                <Music className="w-8 h-8 text-gray-600" />
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-300">No songs yet</h3>
+                            <p className="text-gray-500 mt-1 mb-6 max-w-sm mx-auto">Create your first song to start building your repertoire.</p>
+                            <Button variant="outline" onClick={handleCreate}>
+                                Create First Song
+                            </Button>
                         </div>
                     )}
                 </div>

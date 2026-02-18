@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../lib/utils';
 
 interface EditorProps {
     value: string;
@@ -8,10 +9,6 @@ interface EditorProps {
 }
 
 export const Editor: React.FC<EditorProps> = ({ value, onChange, className, inputRef }) => {
-    const handleSelect = () => {
-        // Optional: propagate cursor position if needed
-    };
-
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         // Smart Wrap: Ctrl+Space wraps the word before cursor in []
         if (e.ctrlKey && e.code === 'Space') {
@@ -45,11 +42,12 @@ export const Editor: React.FC<EditorProps> = ({ value, onChange, className, inpu
             ref={inputRef}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            onSelect={handleSelect}
-            onClick={handleSelect}
             onKeyDown={handleKeyDown}
-            className={`w-full h-full p-4 md:pb-4 pb-80 bg-gray-900 text-white font-mono text-lg resize-none focus:outline-none ${className}`}
-            placeholder="Type lyrics... Ctrl+Space to wrap chord (e.g. C -> [C])"
+            className={cn(
+                "w-full h-full p-6 bg-transparent text-gray-200 font-mono text-base resize-none focus:outline-none leading-relaxed selection:bg-orange-500/30 placeholder:text-gray-600",
+                className
+            )}
+            placeholder="Type lyrics here... Use [C], [Am] for chords. Ctrl+Space to wrap word in brackets."
             spellCheck={false}
         />
     );
